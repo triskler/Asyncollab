@@ -1,4 +1,4 @@
-ï»¿# Visual Studio
+# Visual Studio
 .vs/
 *.user
 *.suo
@@ -11,7 +11,7 @@
 *.tmp
 *.ide
 
-# BinÃ¡rios e Builds
+# Binários e Builds
 bin/
 obj/
 Debug/
@@ -21,24 +21,24 @@ Release/
 *.a
 *.lib
 
-# ConfiguraÃ§Ãµes de Ambiente
+# Configurações de Ambiente
 appsettings.*.json
 launchSettings.json
 
-# Testes e Cobertura de CÃ³digo
+# Testes e Cobertura de Código
 TestResults/
 *.coverage
 *.testlog
 *.trx
 
-# Pacotes e DependÃªncias
+# Pacotes e Dependências
 packages/
 node_modules/
 .vscode/
 *.nupkg
 *.snupkg
 
-# Backup e TemporÃ¡rios
+# Backup e Temporários
 *.bak
 *.swp
 *.swo

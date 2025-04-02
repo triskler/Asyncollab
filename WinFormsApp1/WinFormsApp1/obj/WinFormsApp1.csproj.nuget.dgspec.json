@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\fonse\\Desktop\\UniAberta\\Laboratorio_desenvolvimento\\Projeto Asyncollab\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj": {}
+    "C:\\Users\\nunop\\Source\\Repos\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\fonse\\Desktop\\UniAberta\\Laboratorio_desenvolvimento\\Projeto Asyncollab\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj": {
+    "C:\\Users\\nunop\\Source\\Repos\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\fonse\\Desktop\\UniAberta\\Laboratorio_desenvolvimento\\Projeto Asyncollab\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj",
+        "projectUniqueName": "C:\\Users\\nunop\\Source\\Repos\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj",
         "projectName": "WinFormsApp1",
-        "projectPath": "C:\\Users\\fonse\\Desktop\\UniAberta\\Laboratorio_desenvolvimento\\Projeto Asyncollab\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj",
-        "packagesPath": "C:\\Users\\fonse\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\fonse\\Desktop\\UniAberta\\Laboratorio_desenvolvimento\\Projeto Asyncollab\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\obj\\",
+        "projectPath": "C:\\Users\\nunop\\Source\\Repos\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\WinFormsApp1.csproj",
+        "packagesPath": "C:\\Users\\nunop\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nunop\\Source\\Repos\\Asyncollab\\WinFormsApp1\\WinFormsApp1\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\fonse\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nunop\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

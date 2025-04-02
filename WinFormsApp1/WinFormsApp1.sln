@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsApp1", "WinFormsApp1\WinFormsApp1.csproj", "{BA89F044-F904-474C-91FE-85EE0F628C0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsynCollabPDF", "WinFormsApp1\AsynCollabPDF.csproj", "{BA89F044-F904-474C-91FE-85EE0F628C0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsynCollabPDF.Tests", "AsynCollabPDF.Tests\AsynCollabPDF.Tests.csproj", "{116AF0EE-D92B-476C-ACAB-7E4D34039B6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BA89F044-F904-474C-91FE-85EE0F628C0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA89F044-F904-474C-91FE-85EE0F628C0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA89F044-F904-474C-91FE-85EE0F628C0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{116AF0EE-D92B-476C-ACAB-7E4D34039B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{116AF0EE-D92B-476C-ACAB-7E4D34039B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{116AF0EE-D92B-476C-ACAB-7E4D34039B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{116AF0EE-D92B-476C-ACAB-7E4D34039B6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
