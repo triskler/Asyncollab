@@ -16,6 +16,7 @@ bin/
 obj/
 Debug/
 Release/
+WinFormsApp1/.vs
 *.o
 *.so
 *.a
