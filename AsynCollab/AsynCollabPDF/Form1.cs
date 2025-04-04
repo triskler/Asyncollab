@@ -1,4 +1,4 @@
-namespace WinFormsApp1
+namespace AsynCollabPDF
 {
     public partial class Form1 : Form
     {

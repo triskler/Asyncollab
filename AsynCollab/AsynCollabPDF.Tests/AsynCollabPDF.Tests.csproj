@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WinFormsApp1\AsynCollabPDF.csproj" />
+    <ProjectReference Include="..\AsynCollabPDF\AsynCollabPDF.csproj" />
   </ItemGroup>
 
   <ItemGroup>
