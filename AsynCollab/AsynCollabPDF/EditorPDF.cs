@@ -1,4 +1,5 @@
 using System;
+using AsynCollabPDF.Views;
 
 namespace AsynCollabPDF
 {
@@ -13,7 +14,7 @@ namespace AsynCollabPDF
         {
             //vou deixar caso precisem de testar a view enquanto não houver classe controller 
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new MainView());
 
             /* Quando tivermos a classe controller, é esta que vai chamar a view para iniciar a abertura da primeira janela
             Controller controller = new Controller();
