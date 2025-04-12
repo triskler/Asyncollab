@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="PdfiumViewer" Version="2.13.0" />
+    <PackageReference Include="PDFsharp" Version="6.1.1" />
   </ItemGroup>
 
 </Project>
