@@ -2,16 +2,21 @@ using System;
 using System.Drawing;
 using System.IO;
 using PdfiumViewer;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfDocumentSharp = PdfSharp.Pdf.PdfDocument;
+using PdfDocumentPdfium = PdfiumViewer.PdfDocument;
 
 namespace AsynCollabPDF.Models
 {
     /// <summary>
     /// Classe que representa um documento PDF.
-    /// Responsável por carregar, disponibilizar e renderizar páginas do PDF como imagens.
+    /// Usa PdfSharp para leitura e PdfiumViewer para renderização.
     /// </summary>
     public class Document : IDisposable
     {
-        private PdfiumViewer.PdfDocument documentoAtual;
+        private PdfDocumentSharp documentoSharp;
+        private PdfDocumentPdfium documentoPdfium;
         private string caminhoAtual;
 
         // Evento que notifica quando um ficheiro é carregado com sucesso
@@ -20,26 +25,25 @@ namespace AsynCollabPDF.Models
         // Evento que notifica quando uma nova página é solicitada
         public event EventHandler<int> PaginaAlterada;
 
-        // Construtor - inicializa o estado interno do modelo
         public Document()
         {
-            documentoAtual = null;
+            documentoSharp = null;
+            documentoPdfium = null;
             caminhoAtual = string.Empty;
         }
 
         /// <summary>
         /// Indica se há um documento carregado.
         /// </summary>
-        public bool DocumentoCarregado => documentoAtual != null;
+        public bool DocumentoCarregado => documentoSharp != null && documentoPdfium != null;
 
         /// <summary>
         /// Retorna o número total de páginas do documento carregado.
         /// </summary>
-        public int NumeroPaginas => documentoAtual?.PageCount ?? 0;
+        public int NumeroPaginas => documentoPdfium?.PageCount ?? 0;
 
         /// <summary>
-        /// Abre um ficheiro PDF a partir do caminho fornecido.
-        /// Se já houver um documento carregado, este é libertado antes.
+        /// Abre um ficheiro PDF utilizando PdfSharp e PdfiumViewer.
         /// </summary>
         /// <param name="localizacaoFicheiro">Caminho completo para o ficheiro PDF</param>
         /// <returns>True se o ficheiro for carregado com sucesso, false caso contrário</returns>
@@ -50,18 +54,12 @@ namespace AsynCollabPDF.Models
 
             try
             {
-                // Fecha o documento anterior, se existir
                 FecharDocumento();
 
-                // Abre o ficheiro PDF em modo de leitura
-                using (var stream = File.OpenRead(localizacaoFicheiro))
-                {
-                    documentoAtual = PdfiumViewer.PdfDocument.Load(stream);
-                }
-
+                documentoSharp = PdfReader.Open(localizacaoFicheiro, PdfDocumentOpenMode.ReadOnly);
+                documentoPdfium = PdfDocumentPdfium.Load(localizacaoFicheiro);
                 caminhoAtual = localizacaoFicheiro;
 
-                // Dispara o evento para avisar que o ficheiro está disponível
                 FicheiroDisponivel?.Invoke(this, EventArgs.Empty);
                 return true;
             }
@@ -72,22 +70,20 @@ namespace AsynCollabPDF.Models
         }
 
         /// <summary>
-        /// Solicita a primeira página do documento como imagem.
-        /// Ideal para ser usada quando o PDF é carregado pela primeira vez.
+        /// Renderiza a primeira página do documento.
         /// </summary>
-        /// <param name="pagina">Imagem que vai receber o conteúdo da página</param>
-        /// <returns>True se a página for renderizada com sucesso</returns>
+        /// <param name="pagina">Imagem onde o conteúdo será colocado</param>
+        /// <returns>True se renderizado com sucesso</returns>
         public bool SolicitarFicheiro(ref Image pagina)
         {
             return SolicitarPagina(0, ref pagina);
         }
 
         /// <summary>
-        /// Verifica se a página existe e dispara o evento correspondente.
-        /// Este método não devolve a imagem, apenas informa que uma nova página foi pedida.
+        /// Dispara evento para notificar que uma página foi pedida.
         /// </summary>
-        /// <param name="index">Índice da página (começa em 0)</param>
-        /// <returns>True se a página existir e o evento for disparado</returns>
+        /// <param name="index">Índice da página</param>
+        /// <returns>True se válida e evento disparado</returns>
         public bool ObterPagina(int index)
         {
             if (!DocumentoCarregado || index < 0 || index >= NumeroPaginas)
@@ -98,10 +94,10 @@ namespace AsynCollabPDF.Models
         }
 
         /// <summary>
-        /// Renderiza a página com o índice fornecido e devolve-a como imagem.
+        /// Renderiza uma página como imagem.
         /// </summary>
         /// <param name="index">Índice da página (começa em 0)</param>
-        /// <param name="pagina">Imagem onde o conteúdo será colocado</param>
+        /// <param name="pagina">Imagem onde o conteúdo será desenhado</param>
         /// <returns>True se a imagem for gerada com sucesso</returns>
         public bool SolicitarPagina(int index, ref Image pagina)
         {
@@ -110,30 +106,29 @@ namespace AsynCollabPDF.Models
 
             try
             {
-                // Renderiza a página com resolução 800x1000 e fundo branco
-                pagina = documentoAtual.Render(index, 800, 1000, true);
+                pagina = documentoPdfium.Render(index, 800, 1000, true);
                 return true;
             }
             catch
             {
+                pagina = null;
                 return false;
             }
         }
 
         /// <summary>
-        /// Fecha o documento atual e liberta os recursos utilizados.
+        /// Fecha documentos e liberta recursos.
         /// </summary>
         public void FecharDocumento()
         {
-            documentoAtual?.Dispose();
-            documentoAtual = null;
+            documentoSharp?.Close();
+            documentoPdfium?.Dispose();
+
+            documentoSharp = null;
+            documentoPdfium = null;
             caminhoAtual = string.Empty;
         }
 
-        /// <summary>
-        /// Implementação do padrão IDisposable.
-        /// Garante que os recursos são libertados quando o objeto é destruído.
-        /// </summary>
         public void Dispose()
         {
             FecharDocumento();
