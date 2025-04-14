@@ -24,7 +24,7 @@ namespace AsynCollabPDF.Views
             // Lógica de inicialização, se necessário
         }
 
-        private void btnCarregarPDF_Click(object sender, EventArgs e)
+        public void btnCarregarPDF_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {

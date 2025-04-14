@@ -63,8 +63,20 @@ namespace AsynCollabPDF.Models
                 FicheiroDisponivel?.Invoke(this, EventArgs.Empty);
                 return true;
             }
-            catch
+            
+            catch (PdfReaderException ex)
             {
+                // log or handle PDFsharp-specific issue
+                return false;
+            }
+            catch (IOException ex)
+            {
+                // handle file access issues
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // log unknown exceptions
                 return false;
             }
         }
