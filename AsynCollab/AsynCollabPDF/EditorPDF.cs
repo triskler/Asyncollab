@@ -1,6 +1,7 @@
 using System;
 using AsynCollabPDF.Views;
 
+
 namespace AsynCollabPDF
 {
     class EditorPDF
@@ -14,7 +15,11 @@ namespace AsynCollabPDF
         {
             //vou deixar caso precisem de testar a view enquanto não houver classe controller 
             ApplicationConfiguration.Initialize();
+            Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainView());
+            Application.EnableVisualStyles();
+            
+            
 
             /* Quando tivermos a classe controller, é esta que vai chamar a view para iniciar a abertura da primeira janela
             Controller controller = new Controller();
