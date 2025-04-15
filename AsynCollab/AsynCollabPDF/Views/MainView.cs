@@ -1,27 +1,27 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
-using PdfiumViewer; 
+using PdfiumViewer;
 
 namespace AsynCollabPDF.Views
 {
     public partial class MainView : Form
     {
-        
+
 
         public MainView()
         {
             InitializeComponent();
 
-            
-            btnCarregarPDF.Text = "Carregar PDF"; 
-            btnCarregarPDF.Click += new EventHandler(btnCarregarPDF_Click); // Associa o evento Click ao método
+
+            btnCarregarPDF.Text = "Carregar PDF";
+            btnCarregarPDF.Click += new EventHandler(btnCarregarPDF_Click); // Associa o evento Click ao m?todo
             this.Load += new EventHandler(MainView_Load);
         }
 
         private void MainView_Load(object sender, EventArgs e)
         {
-            // Lógica de inicialização, se necessário
+            // L?gica de inicializa??o, se necess?rio
         }
 
         public void btnCarregarPDF_Click(object sender, EventArgs e)
@@ -38,13 +38,13 @@ namespace AsynCollabPDF.Views
 
                     if (extensao != ".pdf")
                     {
-                        MessageBox.Show("Erro: O arquivo selecionado não é um PDF. Por favor, selecione um arquivo PDF.", "Erro de Formato", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return; // Interrompe a execução se o arquivo não for PDF
+                        MessageBox.Show("Erro: O arquivo selecionado n?o ? um PDF. Por favor, selecione um arquivo PDF.", "Erro de Formato", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; // Interrompe a execu??o se o arquivo n?o for PDF
                     }
 
                     MessageBox.Show($"Arquivo selecionado: {caminhoArquivo}");
 
-                    // Lógica para abrir e exibir o PDF
+                    // L?gica para abrir e exibir o PDF
                     using (var pdfViewerForm = new Form())
                     {
                         var pdfViewer = new PdfViewer();

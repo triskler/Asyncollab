@@ -1,4 +1,4 @@
-﻿namespace AsynCollabPDF.Views
+namespace AsynCollabPDF.Views
 {
     partial class MainView
     {
