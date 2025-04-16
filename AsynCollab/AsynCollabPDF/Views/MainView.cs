@@ -42,7 +42,7 @@ namespace AsynCollabPDF.Views
                         return; // Interrompe a execução se o arquivo não for PDF
                     }
 
-                    MessageBox.Show($"Arquivo selecionado: {caminhoArquivo}");
+                    controller.UtilizadorClicouEmAbrirFicheiro(this, caminhoArquivo);
 
                     //controller.ProcessarFicheiro(caminhoArquivo);
                 }
@@ -120,6 +120,25 @@ namespace AsynCollabPDF.Views
         private void FicheiroInvalidoHandler(string mensagem, string titulo, MessageBoxButtons botoes, MessageBoxIcon icone)
         {
             MessageBox.Show(mensagem, titulo, botoes, icone);
+        }
+        public void RenderizarPagina(System.Drawing.Image imagem)
+        {
+            // Cria um novo formulário para exibir a imagem recebida (1 página)
+            using (var form = new Form())
+            {
+                form.Text = "Página PDF";
+                form.WindowState = FormWindowState.Maximized;
+
+                PictureBox pictureBox = new PictureBox
+                {
+                    Dock = DockStyle.Fill,
+                    Image = imagem,
+                    SizeMode = PictureBoxSizeMode.Zoom
+                };
+
+                form.Controls.Add(pictureBox);
+                form.ShowDialog();
+            }
         }
     }
 }

@@ -14,24 +14,13 @@ namespace AsynCollabPDF
         [STAThread]
         static void Main()
         {
-            //vou deixar caso precisem de testar a view enquanto não houver classe controller 
             ApplicationConfiguration.Initialize();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Cria uma instância do Controller
+            // Usa o método que já tens preparado no controller
             Controllers.MainController controller = new Controllers.MainController();
-            // Passa o Controller para a MainView
-            MainView mainView = new MainView(controller);
-            // Inicia a aplicação com a MainView
-            Application.Run(mainView);
-
-
-
-            /* Quando tivermos a classe controller, é esta que vai chamar a view para iniciar a abertura da primeira janela
-            Controller controller = new Controller();
             controller.IniciarPrograma();
-            */
         }
     }
 }
