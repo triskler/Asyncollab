@@ -21,7 +21,7 @@ namespace AsynCollabPDF.Controllers
 
         public void IniciarPrograma()
         {
-            _view = new MainView(this); // a view recebe o controller no construtor
+            _view = new MainView(this);
             Application.Run(_view);
         }
 
@@ -31,7 +31,12 @@ namespace AsynCollabPDF.Controllers
             bool carregado = _model.AbrirFicheiro(localizacaoFicheiro);
             if (!carregado)
             {
-                // aqui poderias mostrar uma mensagem de erro na view
+                MessageBox.Show(
+                    "Erro ao carregar o ficheiro. Verifique se o caminho está correto ou se o ficheiro não está corrompido.",
+                    "Erro ao Abrir Ficheiro",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
 
