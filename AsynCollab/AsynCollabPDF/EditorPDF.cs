@@ -1,6 +1,7 @@
 using System;
 using AsynCollabPDF.Views;
 using System.Windows.Forms;
+using AsynCollabPDF.Controllers;
 
 
 namespace AsynCollabPDF
@@ -14,12 +15,7 @@ namespace AsynCollabPDF
         [STAThread]
         static void Main()
         {
-            ApplicationConfiguration.Initialize();
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            // Usa o método que já tens preparado no controller
-            Controllers.MainController controller = new Controllers.MainController();
+            MainController controller = new MainController();
             controller.IniciarPrograma();
         }
     }

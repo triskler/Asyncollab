@@ -1,143 +1,118 @@
-using System;
-using System.IO;
-using System.Windows.Forms;
-using PdfiumViewer;
+Ôªøusing System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing;
+using AsynCollabPDF.Models;
+
+/// <summary>
+/// Class View que mant√©m a comunica√ß√£o por eventos com o controller e o model. Tive de alterar alguns m√©todos
+/// e mudar outros de sitio, mas assim j√° funciona de acordo com o esperado na UC. 
+/// A implementa√ß√£o dos m√©todos anteriores mant√©m-se no ficheiro "FormMain", que era o antigo ficheiro "MainView".
+/// 
+/// Qualquer d√∫vida pergutem-me. AM
+/// </summary>
 
 namespace AsynCollabPDF.Views
 {
-    public partial class MainView : Form
+    public class MainView
     {
-        private Controllers.MainController controller;
-        private PdfiumViewer.PdfDocument pdfDocument; // Documento PDF
-        private int currentPage = 0; // P·gina atual
+        private Document model;
+        private FormMain janela;
+        private ViewLog viewLog;
 
-        public MainView(Controllers.MainController controller)
+        //Vari√°vel passada por refer√™ncia ao model, para renderizar uma p√°gina
+        //O model abre a p√°gina e envia-a para a view, a view s√≥ envia o index da p√°gina
+        public Image paginaAberta;
+
+        public delegate void FicheiroAbertoHandler(string nomeFicheiro);
+        public event FicheiroAbertoHandler OnClickAbrirFicheiro;
+        public delegate void SolicitacaoFicheiroHandler(ref Image paginaAberta);
+        public event SolicitacaoFicheiroHandler SolicitarFicheiro;
+
+        public delegate void PaginaAlteradaHandler(int indexPagina);
+        public event PaginaAlteradaHandler OnClickMudarPagina;
+        public delegate void SolicitacaoPaginaHandler(int indexPagina, ref Image paginaAberta);
+        public event SolicitacaoPaginaHandler SolicitarPagina;
+
+        public delegate string SolicitacaoErrorLogHandler();
+        public event SolicitacaoErrorLogHandler SolicitarErrorLog;
+
+        public MainView(Document m)
         {
-            InitializeComponent();
-            this.controller = controller;
-            //this.controller.FicheiroInvalido += FicheiroInvalidoHandler; // Inscreve-se no evento de erro
-            //this.controller.FicheiroDisponivel += SolicitarFicheiro; // Inscreve-se no evento FicheiroDisponivel
+            model = m;
+            viewLog = new ViewLog(janela);
+            paginaAberta = null;
         }
 
-        private void MainView_Load(object sender, EventArgs e)
+        public void DesenharUI()
         {
-            
+            janela = new FormMain();
+            janela.View = this;
+            janela.ShowDialog();
         }
 
-        public void btnCarregarPDF_Click(object sender, EventArgs e)
+        public void EncerrarPrograma()
         {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            janela.EncerrarPrograma();
+        }
+
+        public void AtivarViewLog()
+        {
+            viewLog.AtivarViewLog();
+        }
+
+        public void OnLogAlterado()
+        {
+            viewLog.LogUpdate(SolicitarErrorLog());
+        }
+
+        public void UtilizadorClicouEmAbrirFicheiro(string caminho)
+        {
+            OnClickAbrirFicheiro?.Invoke(caminho);
+        }
+
+        public void OnFicheiroDisponivel(object sender, EventArgs e)
+        {
+            SolicitarFicheiro?.Invoke(ref paginaAberta);
+        }
+
+        public void OnFicheiroEnviado(object sender, EventArgs e)
+        {
+            //Devemos chamar sempre o RenderizarPagina e apagamos o RenderizarFicheiro
+            //O model √© que tem o trabalho de abrir a p√°gina e enviar
+            janela.RenderizarPagina(paginaAberta);
+            if (paginaAberta != null)
             {
-                openFileDialog.Title = "Selecione um arquivo PDF";
-                openFileDialog.Filter = "Arquivos PDF (*.pdf)|*.pdf|Todos os arquivos (*.*)|*.*";
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    string caminhoArquivo = openFileDialog.FileName;
-                    string extensao = Path.GetExtension(caminhoArquivo).ToLower();
-
-                    if (extensao != ".pdf")
-                    {
-                        //controller.FicheiroInvalido?.Invoke("Erro: O arquivo selecionado n„o È um PDF. Por favor, selecione um arquivo PDF.", "Erro de Formato", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return; // Interrompe a execuÁ„o se o arquivo n„o for PDF
-                    }
-
-                    controller.UtilizadorClicouEmAbrirFicheiro(this, caminhoArquivo);
-
-                    //controller.ProcessarFicheiro(caminhoArquivo);
-                }
+                janela.RenderizarPagina(paginaAberta);
+            }
+            else
+            {
+                MessageBox.Show("A imagem n√£o foi carregada corretamente!");
             }
         }
 
-        // MÈtodo que solicita o arquivo quando o evento FicheiroDisponivel È disparado
-        public void SolicitarFicheiro(string nome_ficheiro)
+        public void UtilizadorClicouEmMudarPagina(int indexPagina)
         {
-            MessageBox.Show($"O arquivo '{nome_ficheiro}' est· disponÌvel para ser solicitado.");
-            //controller.SolicitarFicheiro(nome_ficheiro); // Chama o mÈtodo do Controller para solicitar o arquivo
+            OnClickMudarPagina?.Invoke(indexPagina);
         }
 
-        // MÈtodo que renderiza o arquivo quando o evento EnviarFicheiro È disparado
-        public void RenderizarFicheiro(string ficheiro)
+        public void OnPaginaDisponivel(object sender, int index)
         {
-            MessageBox.Show($"Renderizando o arquivo: {ficheiro}");
+            SolicitarPagina?.Invoke(index, ref paginaAberta);
+        }
 
-            // Cria um novo formul·rio para o visualizador de PDF
-            using (var pdfViewerForm = new Form())
+        public void OnPaginaEnviada(object sender, EventArgs e)
+        {
+            if (paginaAberta != null)
             {
-                pdfViewerForm.Text = "Visualizador de PDF";
-                pdfViewerForm.WindowState = FormWindowState.Maximized;
-
-                // Cria um PictureBox para exibir a p·gina do PDF
-                PictureBox pictureBox = new PictureBox();
-                pictureBox.Dock = DockStyle.Fill;
-                pdfViewerForm.Controls.Add(pictureBox);
-
-                // Carrega o documento PDF
-                pdfDocument = PdfiumViewer.PdfDocument.Load(ficheiro);
-
-                // Renderiza a p·gina atual em uma imagem
-                RenderizarPagina(currentPage, pictureBox);
-
-                // Adiciona botıes para mudar de p·gina
-                Button btnAnterior = new Button { Text = "P·gina Anterior", Dock = DockStyle.Top };
-                Button btnProxima = new Button { Text = "PrÛxima P·gina", Dock = DockStyle.Top };
-                Label lblPaginaAtual = new Label { Text = $"P·gina: {currentPage + 1}", Dock = DockStyle.Top, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
-
-                btnAnterior.Click += (s, e) => MudarPagina(-1, lblPaginaAtual, pictureBox);
-                btnProxima.Click += (s, e) => MudarPagina(1, lblPaginaAtual, pictureBox);
-
-                pdfViewerForm.Controls.Add(btnAnterior);
-                pdfViewerForm.Controls.Add(lblPaginaAtual);
-                pdfViewerForm.Controls.Add(btnProxima);
-
-                pdfViewerForm.ShowDialog();
+                janela.RenderizarPagina(paginaAberta);
             }
-        }
-
-        private void MudarPagina(int direcao, Label lblPaginaAtual, PictureBox pictureBox)
-        {
-            // LÛgica para mudar a p·gina
-            currentPage += direcao;
-
-            // Limita a p·gina atual
-            if (currentPage < 0) currentPage = 0;
-            if (currentPage >= pdfDocument.PageCount) currentPage = pdfDocument.PageCount - 1;
-
-            lblPaginaAtual.Text = $"P·gina: {currentPage + 1}";
-
-            // Renderiza a nova p·gina no PictureBox
-            RenderizarPagina(currentPage, pictureBox);
-        }
-
-        private void RenderizarPagina(int pagina, PictureBox pictureBox)
-        {
-            using (var image = pdfDocument.Render(pagina, 300, 300, PdfRenderFlags.Annotations))
+            else
             {
-                pictureBox.Image = image; // Atualiza a imagem no PictureBox
-            }
-        }
-
-        private void FicheiroInvalidoHandler(string mensagem, string titulo, MessageBoxButtons botoes, MessageBoxIcon icone)
-        {
-            MessageBox.Show(mensagem, titulo, botoes, icone);
-        }
-        public void RenderizarPagina(System.Drawing.Image imagem)
-        {
-            // Cria um novo formul·rio para exibir a imagem recebida (1 p·gina)
-            using (var form = new Form())
-            {
-                form.Text = "P·gina PDF";
-                form.WindowState = FormWindowState.Maximized;
-
-                PictureBox pictureBox = new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    Image = imagem,
-                    SizeMode = PictureBoxSizeMode.Zoom
-                };
-
-                form.Controls.Add(pictureBox);
-                form.ShowDialog();
+                MessageBox.Show("A imagem n√£o foi carregada corretamente!");
             }
         }
     }

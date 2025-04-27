@@ -6,7 +6,7 @@ namespace AsynCollabPDF.Models
 	/// Classe para fazer log de erros capturados na execução da aplicação
 	/// Pertence ao componente model que mantém e altera o log
 	/// </summary>
-	internal class ModelLog
+	public class ModelLog
 	{
 		//Evento e delegado para alertar que o estado do log foi alterado
 		public delegate void LogAlteradoHandler();

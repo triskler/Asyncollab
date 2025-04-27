@@ -6,6 +6,8 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfDocumentSharp = PdfSharp.Pdf.PdfDocument;
 using PdfDocumentPdfium = PdfiumViewer.PdfDocument;
+using AsynCollabPDF.Views;
+using System.Reflection;
 
 namespace AsynCollabPDF.Models
 {
@@ -15,22 +17,29 @@ namespace AsynCollabPDF.Models
     /// </summary>
     public class Document : IDisposable
     {
+        private MainView view;
+        ModelLog modelLog;
         private PdfDocumentSharp documentoSharp;
         private PdfDocumentPdfium documentoPdfium;
         private string caminhoAtual;
 
-        // Evento que notifica quando um ficheiro é carregado com sucesso
+        // Evento que notifica quando um ficheiro é carregado com sucesso e quando é enviado por referência
         public event EventHandler FicheiroDisponivel;
+        public event EventHandler FicheiroEnviado;
 
         // Evento que notifica quando uma nova página é solicitada
         public event EventHandler<int> PaginaAlterada;
+        public event EventHandler PaginaEnviada;
 
-        public Document()
+        public Document(MainView v)
         {
+            view = v;
             documentoSharp = null;
             documentoPdfium = null;
             caminhoAtual = string.Empty;
         }
+
+        public ModelLog ModelLog { get => modelLog; set => modelLog = value; }
 
         /// <summary>
         /// Indica se há um documento carregado.
@@ -50,8 +59,10 @@ namespace AsynCollabPDF.Models
         public bool AbrirFicheiro(string localizacaoFicheiro)
         {
             if (!File.Exists(localizacaoFicheiro))
-                return false;
-
+            {
+                throw new FicheiroInvalidoException(localizacaoFicheiro);
+                //return false;
+            }
             try
             {
                 FecharDocumento();
@@ -66,17 +77,18 @@ namespace AsynCollabPDF.Models
             
             catch (PdfReaderException ex)
             {
-                // log or handle PDFsharp-specific issue
+                RegistarLog(ex.Message);
                 return false;
             }
             catch (IOException ex)
             {
+                RegistarLog(ex.Message);
                 // handle file access issues
                 return false;
             }
             catch (Exception ex)
             {
-                // log unknown exceptions
+                RegistarLog(ex.Message);
                 return false;
             }
         }
@@ -86,9 +98,12 @@ namespace AsynCollabPDF.Models
         /// </summary>
         /// <param name="pagina">Imagem onde o conteúdo será colocado</param>
         /// <returns>True se renderizado com sucesso</returns>
-        public bool SolicitarFicheiro(ref Image pagina)
+        public void EnviarFicheiro(ref Image pagina)
         {
-            return SolicitarPagina(0, ref pagina);
+            //Em vez de bool, deve lançar excepções
+            //EnviarPagina(0, ref pagina);
+            pagina = documentoPdfium.Render(0, 800, 1000, true);
+            FicheiroEnviado?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -99,7 +114,9 @@ namespace AsynCollabPDF.Models
         public bool ObterPagina(int index)
         {
             if (!DocumentoCarregado || index < 0 || index >= NumeroPaginas)
-                return false;
+            {
+                throw new PaginaInvalidaException(index);
+            }
 
             PaginaAlterada?.Invoke(this, index);
             return true;
@@ -111,20 +128,26 @@ namespace AsynCollabPDF.Models
         /// <param name="index">Índice da página (começa em 0)</param>
         /// <param name="pagina">Imagem onde o conteúdo será desenhado</param>
         /// <returns>True se a imagem for gerada com sucesso</returns>
-        public bool SolicitarPagina(int index, ref Image pagina)
+        public void EnviarPagina(int index, ref Image pagina)
         {
+            //O model deve enviar a página como objeto para a view
+            //A view é que deve renderizar a página
+            //
+            //Em vez de bool, deve lançar excepções
+            //AM
             if (!DocumentoCarregado || index < 0 || index >= NumeroPaginas)
-                return false;
+                //return false;
 
             try
             {
                 pagina = documentoPdfium.Render(index, 800, 1000, true);
-                return true;
+                //PaginaEnviada?.Invoke(this, EventArgs.Empty);
+                //return true;
             }
             catch
             {
                 pagina = null;
-                return false;
+                //return false;
             }
         }
 
@@ -144,6 +167,11 @@ namespace AsynCollabPDF.Models
         public void Dispose()
         {
             FecharDocumento();
+        }
+
+        public void RegistarLog(string msg)
+        {
+            ModelLog.LogErro(msg);
         }
     }
 }

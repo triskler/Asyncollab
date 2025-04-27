@@ -24,7 +24,7 @@
     <Compile Update="Views\Resource1.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>MainView.resx</DependentUpon>
+      <DependentUpon>FormMain.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -33,7 +33,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\MainView.resx">
+    <EmbeddedResource Update="Views\FormMain.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>

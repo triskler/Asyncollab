@@ -1,7 +1,7 @@
 
 namespace AsynCollabPDF.Views
 {
-    partial class MainView
+    partial class FormMain
     {
         /// <summary>
         ///  Required designer variable.
@@ -89,7 +89,7 @@ namespace AsynCollabPDF.Views
             FormBorderStyle = FormBorderStyle.Fixed3D;
             Name = "MainView";
             Text = "AsynCollabPDF";
-            Load += MainView_Load;
+            Load += FormMain_Load;
             ResumeLayout(false);
             PerformLayout();
         }

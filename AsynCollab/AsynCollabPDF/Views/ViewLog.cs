@@ -18,7 +18,7 @@ namespace AsynCollabPDF.Views
 
         internal void AtivarViewLog()
         {
-            if (!janelaLog)
+            if (janelaLog == null)
             {
                 janelaLog = new FormLog();
             }
@@ -26,11 +26,10 @@ namespace AsynCollabPDF.Views
 
         internal void LogUpdate(string log)
         {
-            if (janelaLog != null)
-            {
-                janelaLog.EscreverLog(log);
-                janelaLog.ShowDialog(pai);
-            }
+            if (janelaLog == null)
+                return;
+            janelaLog.EscreverLog(log);
+            janelaLog.ShowDialog(pai);
         }
     }
 }
