@@ -83,7 +83,6 @@ namespace AsynCollabPDF.Views
         {
             //Devemos chamar sempre o RenderizarPagina e apagamos o RenderizarFicheiro
             //O model é que tem o trabalho de abrir a página e enviar
-            janela.RenderizarPagina(paginaAberta);
             if (paginaAberta != null)
             {
                 janela.RenderizarPagina(paginaAberta);
