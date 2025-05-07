@@ -15,13 +15,14 @@ namespace AsynCollabPDF.Models
     /// Classe que representa um documento PDF.
     /// Usa PdfSharp para leitura e PdfiumViewer para renderização.
     /// </summary>
-    public class Document : IDisposable
+    public class Document : IPagina, IDisposable
     {
         private MainView view;
         ModelLog modelLog;
         private PdfDocumentSharp documentoSharp;
         private PdfDocumentPdfium documentoPdfium;
         private string caminhoAtual;
+        private int indexPaginaAtual;
 
         // Evento que notifica quando um ficheiro é carregado com sucesso e quando é enviado por referência
         public event EventHandler FicheiroDisponivel;
@@ -31,12 +32,16 @@ namespace AsynCollabPDF.Models
         public event EventHandler<int> PaginaAlterada;
         public event EventHandler PaginaEnviada;
 
+        public delegate void FicheirosConcatenadosHandler(string caminhoFicheiro);
+        public event FicheirosConcatenadosHandler FicheirosConcatenados;
+
         public Document(MainView v)
         {
             view = v;
             documentoSharp = null;
             documentoPdfium = null;
             caminhoAtual = string.Empty;
+            indexPaginaAtual = 0;
         }
 
         public ModelLog ModelLog { get => modelLog; set => modelLog = value; }
@@ -67,7 +72,6 @@ namespace AsynCollabPDF.Models
             {
                 FecharDocumento();
 
-                documentoSharp = PdfReader.Open(localizacaoFicheiro, PdfDocumentOpenMode.ReadOnly);
                 documentoPdfium = PdfDocumentPdfium.Load(localizacaoFicheiro);
                 caminhoAtual = localizacaoFicheiro;
 
@@ -149,6 +153,60 @@ namespace AsynCollabPDF.Models
                 pagina = null;
                 //return false;
             }
+        }
+
+        /// <summary>
+        /// Concatenar dois ficheiros PDF com a API PDFSharp.
+        ///  - Caminho do ficheiro aberto é a variável "caminhoAtual", o método só recebe o segundo caminho.
+        /// 
+        /// Fecha qualquer documento aberto, realiza a concatenação e guarda o ficheiro concatenado no caminho indicado.
+        /// Abre logo o ficheiro concatenado e comunica à view de que o ficheiro está disponível.
+        /// </summary>
+        public bool ConcatenarFicheiros(string caminho2, string caminhoDestino)
+        {
+            string caminho1 = caminhoAtual;
+            //Fecha o documento aberto
+            FecharDocumento();
+            PdfDocumentSharp ficheiroDestino = new PdfDocumentSharp();
+
+            // Método auxiliar para adicionar as páginas de um ficheiro ao documento de destino
+            void JuntarPaginas(string caminho)
+            {
+                PdfDocumentSharp ficheiro = PdfReader.Open(caminho, PdfDocumentOpenMode.Import);
+                for (int i = 0; i < ficheiro.PageCount; i++)
+                {
+                    ficheiroDestino.AddPage(ficheiro.Pages[i]);
+                }
+            }
+
+            JuntarPaginas(caminho1);
+            JuntarPaginas(caminho2);
+
+            // Guarda o ficheiro concatenado
+            ficheiroDestino.Save(caminhoDestino);
+
+            try
+            {
+                FecharDocumento();
+
+                documentoPdfium = PdfDocumentPdfium.Load(caminhoDestino);
+                caminhoAtual = caminhoDestino;
+
+                // Abre o ficheiro concatenado e alerta a view com um evento
+                FicheirosConcatenados?.Invoke(caminhoDestino);
+                return true;
+            }
+            catch
+            {
+                throw new FicheiroInvalidoException(caminhoDestino);
+            }
+        }
+
+        public int indexPagina => indexPaginaAtual;
+
+        public System.Drawing.Image RenderizarPagina()
+        {
+            return documentoPdfium.Render(indexPagina, 800, 1000, true);
         }
 
         /// <summary>
