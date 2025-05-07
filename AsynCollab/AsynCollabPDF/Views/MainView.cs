@@ -40,6 +40,13 @@ namespace AsynCollabPDF.Views
         public delegate string SolicitacaoErrorLogHandler();
         public event SolicitacaoErrorLogHandler SolicitarErrorLog;
 
+        // Novos eventos para o segundo PDF e concatenação
+        public delegate void SegundoFicheiroAbertoHandler(string nomeFicheiro);
+        public event SegundoFicheiroAbertoHandler OnClickAbrirSegundoFicheiro;
+
+        public delegate void ConcatenarPDFsHandler(string primeiroPdf, string segundoPdf);
+        public event ConcatenarPDFsHandler OnClickConcatenarPDFs;
+
         public MainView(Document m)
         {
             model = m;
@@ -113,6 +120,16 @@ namespace AsynCollabPDF.Views
             {
                 MessageBox.Show("A imagem não foi carregada corretamente!");
             }
+        }
+
+        public void UtilizadorClicouEmAbrirSegundoFicheiro(string caminho)
+        {
+            OnClickAbrirSegundoFicheiro?.Invoke(caminho);
+        }
+
+        public void UtilizadorClicouEmConcatenarPDFs(string primeiroPdf, string segundoPdf)
+        {
+            OnClickConcatenarPDFs?.Invoke(primeiroPdf, segundoPdf);
         }
     }
 }

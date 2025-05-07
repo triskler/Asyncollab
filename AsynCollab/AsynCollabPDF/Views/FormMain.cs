@@ -9,11 +9,155 @@ namespace AsynCollabPDF.Views
     {
         private MainView view;
         private PdfiumViewer.PdfDocument pdfDocument; // Documento PDF
-        private int currentPage = 0; // P·gina atual
+        private PdfiumViewer.PdfDocument segundoPdfDocument; // Segundo documento PDF
+        private int currentPage = 0; // P√°gina atual
+        private string primeiroPdfPath; // Caminho do primeiro PDF
+        private string segundoPdfPath; // Caminho do segundo PDF
+        private PictureBox pictureBox; // PictureBox para visualiza√ß√£o do PDF
+        private Label lblPaginaAtual; // Label para mostrar a p√°gina atual
 
         public FormMain()
         {
             InitializeComponent();
+            
+            // Configura o formul√°rio
+            this.Text = "AsynCollab PDF";
+            this.Size = new System.Drawing.Size(800, 600);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.MinimumSize = new System.Drawing.Size(600, 400);
+
+            // Cria um TableLayoutPanel para organizar os controles
+            TableLayoutPanel mainTable = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3,
+                Padding = new Padding(10)
+            };
+
+            // Configura as propor√ß√µes das linhas
+            mainTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // Painel de bot√µes
+            mainTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); // Painel de navega√ß√£o
+            mainTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // √Årea de visualiza√ß√£o
+
+            // Cria um TableLayoutPanel para os bot√µes principais
+            TableLayoutPanel buttonPanel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 3,
+                RowCount = 1,
+                Padding = new Padding(5)
+            };
+
+            // Configura as colunas do painel de bot√µes
+            buttonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            buttonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            buttonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+
+            // Configura os bot√µes com estilo consistente
+            Button btnCarregarPDF = new Button
+            {
+                Text = "Carregar Primeiro PDF",
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnCarregarPDF.Click += btnCarregarPDF_Click;
+
+            Button btnCarregarSegundoPDF = new Button
+            {
+                Text = "Carregar Segundo PDF",
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnCarregarSegundoPDF.Click += btnCarregarSegundoPDF_Click;
+
+            Button btnConcatenarPDFs = new Button
+            {
+                Text = "Concatenar PDFs",
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnConcatenarPDFs.Click += btnConcatenarPDFs_Click;
+
+            // Adiciona os bot√µes ao painel
+            buttonPanel.Controls.Add(btnCarregarPDF, 0, 0);
+            buttonPanel.Controls.Add(btnCarregarSegundoPDF, 1, 0);
+            buttonPanel.Controls.Add(btnConcatenarPDFs, 2, 0);
+
+            // Cria um TableLayoutPanel para os controles de navega√ß√£o
+            TableLayoutPanel navigationPanel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 3,
+                RowCount = 1,
+                Padding = new Padding(5)
+            };
+
+            // Configura as colunas do painel de navega√ß√£o
+            navigationPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            navigationPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            navigationPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+
+            // Adiciona bot√µes de navega√ß√£o
+            Button btnAnterior = new Button
+            {
+                Text = "P√°gina Anterior",
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnAnterior.Click += (s, e) => MudarPagina(-1);
+
+            Button btnProxima = new Button
+            {
+                Text = "Pr√≥xima P√°gina",
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnProxima.Click += (s, e) => MudarPagina(1);
+
+            // Adiciona label para mostrar a p√°gina atual
+            lblPaginaAtual = new Label
+            {
+                Text = "P√°gina: 0",
+                Dock = DockStyle.Fill,
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                Font = new System.Drawing.Font("Segoe UI", 10)
+            };
+
+            navigationPanel.Controls.Add(btnAnterior, 0, 0);
+            navigationPanel.Controls.Add(lblPaginaAtual, 1, 0);
+            navigationPanel.Controls.Add(btnProxima, 2, 0);
+
+            // Adiciona um PictureBox para visualiza√ß√£o do PDF
+            pictureBox = new PictureBox
+            {
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            // Adiciona os pain√©is ao TableLayoutPanel principal
+            mainTable.Controls.Add(buttonPanel, 0, 0);
+            mainTable.Controls.Add(navigationPanel, 0, 1);
+            mainTable.Controls.Add(pictureBox, 0, 2);
+
+            // Adiciona o TableLayoutPanel principal ao formul√°rio
+            this.Controls.Add(mainTable);
         }
 
         private void FormMain_Load(object sender, EventArgs e){}
@@ -35,83 +179,62 @@ namespace AsynCollabPDF.Views
 
                     if (extensao != ".pdf")
                     {
-                        //Se o ficheio n„o for PDF, lanÁa uma excepÁ„o prÛpria criada no ficheiro TipoFicheiroInvalidoException.cs
+                        //Se o ficheio nÔøΩo for PDF, lanÔøΩa uma excepÔøΩÔøΩo prÔøΩpria criada no ficheiro TipoFicheiroInvalidoException.cs
                         throw new TipoFicheiroInvalidoException(caminhoArquivo, "*.pdf");
 
-                        //controller.FicheiroInvalido?.Invoke("Erro: O arquivo selecionado n„o È um PDF. Por favor, selecione um arquivo PDF.", "Erro de Formato", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        //controller.FicheiroInvalido?.Invoke("Erro: O arquivo selecionado nÔøΩo ÔøΩ um PDF. Por favor, selecione um arquivo PDF.", "Erro de Formato", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
+                    primeiroPdfPath = caminhoArquivo;
                     view.UtilizadorClicouEmAbrirFicheiro(caminhoArquivo);
                 }
             }
         }
 
-        /* MÈtodo definido no novo ficheiro View.cs AM
-         * MÈtodo que solicita o arquivo quando o evento FicheiroDisponivel È disparado
+        /* M√©todo definido no novo ficheiro View.cs AM
+         * M√©todo que solicita o arquivo quando o evento FicheiroDisponivel √© disparado
         public void SolicitarFicheiro(string nome_ficheiro)
         {
-            MessageBox.Show($"O arquivo '{nome_ficheiro}' est· disponÌvel para ser solicitado.");
-            //controller.SolicitarFicheiro(nome_ficheiro); // Chama o mÈtodo do Controller para solicitar o arquivo
+            MessageBox.Show($"O arquivo '{nome_ficheiro}' est√° dispon√≠vel para ser solicitado.");
+            //controller.SolicitarFicheiro(nome_ficheiro); // Chama o m√©todo do Controller para solicitar o arquivo
         }*/
 
-        // MÈtodo que renderiza o arquivo quando o evento EnviarFicheiro È disparado
+        // M√©todo que renderiza o arquivo quando o evento EnviarFicheiro √© disparado
         public void RenderizarFicheiro(string ficheiro)
         {
-            MessageBox.Show($"Renderizando o arquivo: {ficheiro}");
+            // Carrega o documento PDF
+            pdfDocument = PdfiumViewer.PdfDocument.Load(ficheiro);
+            currentPage = 0;
+            lblPaginaAtual.Text = $"P√°gina: {currentPage + 1}";
 
-            // Cria um novo formul·rio para o visualizador de PDF
-            using (var pdfViewerForm = new Form())
-            {
-                pdfViewerForm.Text = "Visualizador de PDF";
-                pdfViewerForm.WindowState = FormWindowState.Maximized;
-
-                // Cria um PictureBox para exibir a p·gina do PDF
-                PictureBox pictureBox = new PictureBox();
-                pictureBox.Dock = DockStyle.Fill;
-                pdfViewerForm.Controls.Add(pictureBox);
-
-                // Carrega o documento PDF
-                pdfDocument = PdfiumViewer.PdfDocument.Load(ficheiro);
-
-                // Renderiza a p·gina atual em uma imagem
-                RenderizarPagina(currentPage, pictureBox);
-
-                // Adiciona botıes para mudar de p·gina
-                Button btnAnterior = new Button { Text = "P·gina Anterior", Dock = DockStyle.Top };
-                Button btnProxima = new Button { Text = "PrÛxima P·gina", Dock = DockStyle.Top };
-                Label lblPaginaAtual = new Label { Text = $"P·gina: {currentPage + 1}", Dock = DockStyle.Top, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
-
-                btnAnterior.Click += (s, e) => MudarPagina(-1, lblPaginaAtual, pictureBox);
-                btnProxima.Click += (s, e) => MudarPagina(1, lblPaginaAtual, pictureBox);
-
-                pdfViewerForm.Controls.Add(btnAnterior);
-                pdfViewerForm.Controls.Add(lblPaginaAtual);
-                pdfViewerForm.Controls.Add(btnProxima);
-
-                pdfViewerForm.ShowDialog();
-            }
+            // Renderiza a primeira p√°gina
+            RenderizarPagina(currentPage);
         }
 
-        private void MudarPagina(int direcao, Label lblPaginaAtual, PictureBox pictureBox)
+        private void MudarPagina(int direcao)
         {
-            // LÛgica para mudar a p·gina
+            if (pdfDocument == null) return;
+
+            // L√≥gica para mudar a p√°gina
             currentPage += direcao;
 
-            // Limita a p·gina atual
+            // Limita a p√°gina atual
             if (currentPage < 0) currentPage = 0;
             if (currentPage >= pdfDocument.PageCount) currentPage = pdfDocument.PageCount - 1;
 
-            lblPaginaAtual.Text = $"P·gina: {currentPage + 1}";
+            lblPaginaAtual.Text = $"P√°gina: {currentPage + 1}";
 
-            // Renderiza a nova p·gina no PictureBox
-            RenderizarPagina(currentPage, pictureBox);
+            // Renderiza a nova p√°gina no PictureBox
+            RenderizarPagina(currentPage);
         }
 
-        private void RenderizarPagina(int pagina, PictureBox pictureBox)
+        private void RenderizarPagina(int pagina)
         {
+            if (pdfDocument == null) return;
+
             using (var image = pdfDocument.Render(pagina, 300, 300, PdfRenderFlags.Annotations))
             {
-                pictureBox.Image = image; // Atualiza a imagem no PictureBox
+                pictureBox.Image = image;
             }
         }
 
@@ -121,10 +244,10 @@ namespace AsynCollabPDF.Views
         }
         public void RenderizarPagina(System.Drawing.Image imagem)
         {
-            // Cria um novo formul·rio para exibir a imagem recebida (1 p·gina)
+            // Cria um novo formul√°rio para exibir a imagem recebida (1 p√°gina)
             using (var form = new Form())
             {
-                form.Text = "P·gina PDF";
+                form.Text = "P√°gina PDF";
                 form.WindowState = FormWindowState.Maximized;
 
                 PictureBox pictureBox = new PictureBox
@@ -142,6 +265,40 @@ namespace AsynCollabPDF.Views
         public void EncerrarPrograma()
         {
             Application.Exit();
+        }
+
+        public void btnCarregarSegundoPDF_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "Selecione o segundo arquivo PDF";
+                openFileDialog.Filter = "Arquivos PDF (*.pdf)|*.pdf|Todos os arquivos (*.*)|*.*";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string caminhoArquivo = openFileDialog.FileName;
+                    string extensao = Path.GetExtension(caminhoArquivo).ToLower();
+
+                    if (extensao != ".pdf")
+                    {
+                        throw new TipoFicheiroInvalidoException(caminhoArquivo, "*.pdf");
+                    }
+
+                    segundoPdfPath = caminhoArquivo;
+                    view.UtilizadorClicouEmAbrirSegundoFicheiro(caminhoArquivo);
+                }
+            }
+        }
+
+        private void btnConcatenarPDFs_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(primeiroPdfPath) || string.IsNullOrEmpty(segundoPdfPath))
+            {
+                MessageBox.Show("Por favor, carregue ambos os arquivos PDF antes de concatenar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            view.UtilizadorClicouEmConcatenarPDFs(primeiroPdfPath, segundoPdfPath);
         }
     }
 }
