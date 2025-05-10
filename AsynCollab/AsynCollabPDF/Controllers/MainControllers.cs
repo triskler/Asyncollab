@@ -71,7 +71,17 @@ namespace AsynCollabPDF.Controllers
         {
             try
             {
-                bool carregado = _model.ObterPagina(indexPagina);
+                _model.ObterPagina(indexPagina);
+            }
+            catch (FicheiroInvalidoException ex)
+            {
+                _model.RegistarLog(ex.Message);
+                MessageBox.Show(
+                    "Erro ao aceder ao ficheiro aberto. Verifique se o ficheiro não está corrompido.",
+                    "Erro ao aceder a ficheiro",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
             catch (PaginaInvalidaException ex)
             {
@@ -84,30 +94,6 @@ namespace AsynCollabPDF.Controllers
                 );
             }
         }
-
-        /*A subscrição à view tornou este método desnecessário AM
-        // Quando o modelo avisa que o ficheiro está carregado
-        private void OnFicheiroDisponivel(object sender, EventArgs e)
-        {
-            Image primeiraPagina = null;
-            bool sucesso = _model.SolicitarFicheiro(ref primeiraPagina);
-
-            if (sucesso)
-                _view.RenderizarPagina(primeiraPagina);
-        }
-        */
-
-        /*A subscrição à view tornou este método desnecessário AM
-        // Quando o modelo avisa que a página foi alterada
-        private void OnPaginaAlterada(object sender, int novaPagina)
-        {
-            Image pagina = null;
-            bool sucesso = _model.SolicitarPagina(novaPagina, ref pagina);
-
-            if (sucesso)
-                _view.RenderizarPagina(pagina);
-        }
-        */
 
     }
 }

@@ -17,7 +17,7 @@ namespace AsynCollabPDF.Models
             doc = PdfDocument.Load(localizacaoFicheiro);
         }
 
-        public Stream ConverterImagemParaStream(int indexPagina, int altura, int largura)
+        public Stream ConverterPaginaParaStream(int indexPagina, int altura, int largura)
         { 
             var imagemPagina = doc.Render(indexPagina, altura, largura, true);
             var ms = new MemoryStream();

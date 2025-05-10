@@ -10,20 +10,16 @@ namespace AsynCollabPDF
     {
         public interface IPagina
         {
-            int IndexPaginaAtual { get; set; }
-            //void Renderizar(IRenderizador renderizador);
+            int IndexPaginaAtual { get; }
             IFicheiroPDF Ficheiro { get; }
         }
 
         // Interface para abstrair a API utilizada para renderizar um ficheiro (se quisermos mudar do pdfiumViewer)
         public interface IFicheiroPDF
         {
-            Stream ConverterImagemParaStream(int indexPagina, int altura, int largura);
-        }
+            Stream ConverterPaginaParaStream(int indexPagina, int altura, int largura);
 
-        /*public interface IRenderizador
-        {
-            void RenderizarPagina(IPagina pagina);
-        }*/
+            int NumeroPaginas { get; }
+        }
     }
 }

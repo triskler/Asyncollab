@@ -8,8 +8,6 @@ namespace AsynCollabPDF.Views
     public partial class FormMain : Form
     {
         private MainView view;
-        //private PdfiumViewer.PdfDocument pdfDocument; // Documento PDF
-        //private PdfiumViewer.PdfDocument segundoPdfDocument; // Segundo documento PDF
         private int currentPage = 0; // Página atual
         private string primeiroPdfPath; // Caminho do primeiro PDF
         private string segundoPdfPath; // Caminho do segundo PDF
@@ -191,38 +189,26 @@ namespace AsynCollabPDF.Views
             }
         }
 
-        /* Método definido no novo ficheiro View.cs AM
-         * Método que solicita o arquivo quando o evento FicheiroDisponivel é disparado
-        public void SolicitarFicheiro(string nome_ficheiro)
-        {
-            MessageBox.Show($"O arquivo '{nome_ficheiro}' está disponível para ser solicitado.");
-            //controller.SolicitarFicheiro(nome_ficheiro); // Chama o método do Controller para solicitar o arquivo
-        }*/
-
-        // Método que renderiza o arquivo quando o evento EnviarFicheiro é disparado
-        /*public void RenderizarFicheiro(string ficheiro)
-        {
-            // Carrega o documento PDF
-            pdfDocument = PdfiumViewer.PdfDocument.Load(ficheiro);
-            currentPage = 0;
-            lblPaginaAtual.Text = $"Página: {currentPage + 1}";
-
-            // Renderiza a primeira página
-            RenderizarPagina(currentPage);
-        }*/
-
         private void MudarPagina(int direcao)
         {
-            //if (pdfDocument == null) return;
+            if (view.paginaAberta.Ficheiro == null) return;
 
             // Lógica para mudar a página
             currentPage += direcao;
 
             // Limita a página atual
-            if (currentPage < 0) currentPage = 0;
-            //if (currentPage >= pdfDocument.PageCount) currentPage = pdfDocument.PageCount - 1;
-
-            lblPaginaAtual.Text = $"Página: {currentPage + 1}";
+            if (currentPage < 0) 
+                currentPage = 0;
+            if (currentPage >= view.paginaAberta.Ficheiro.NumeroPaginas)
+            {
+                currentPage = view.paginaAberta.Ficheiro.NumeroPaginas - 1;
+                MessageBox.Show(
+                    "Atingiu o final do ficheiro. Nothing to see beyond this point.",
+                    "Página Inválida",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
 
             // Renderiza a nova página no PictureBox
             view.UtilizadorClicouEmMudarPagina(currentPage);
@@ -235,26 +221,14 @@ namespace AsynCollabPDF.Views
 
         public void RenderizarPagina(IPagina pagina)
         {
-            using var stream = pagina.Ficheiro.ConverterImagemParaStream(pagina.IndexPaginaAtual, pictureBox.Height, pictureBox.Width);
+            /* A interface permite à View receber um stream da página, para poder decidir como fazer a renderização
+             * 
+             * A view não sabe nem precisa de saber qual a API que o model utilizou para abrir / converter a página,
+             * apenas que o model devolve um stream com a imagem da página.
+            **/
+            using var stream = pagina.Ficheiro.ConverterPaginaParaStream(pagina.IndexPaginaAtual, pictureBox.Height, pictureBox.Width);
+            lblPaginaAtual.Text = $"Página: {pagina.IndexPaginaAtual + 1}";
             pictureBox.Image = Image.FromStream(stream);
-
-            /* Antiga função implementada pelo Rafael (tentei aproveitar a lógica)
-             * // Cria um novo formulário para exibir a imagem recebida (1 página)
-            using (var form = new Form())
-            {
-                form.Text = "Página PDF";
-                form.WindowState = FormWindowState.Maximized;
-
-                PictureBox pictureBox = new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    Image = imagem,
-                    SizeMode = PictureBoxSizeMode.Zoom
-                };
-
-                form.Controls.Add(pictureBox);
-                form.ShowDialog();
-            }*/
         }
 
         public void EncerrarPrograma()

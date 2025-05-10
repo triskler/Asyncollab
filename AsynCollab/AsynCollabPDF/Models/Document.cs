@@ -110,15 +110,14 @@ namespace AsynCollabPDF.Models
         /// </summary>
         /// <param name="index">Índice da página</param>
         /// <returns>True se válida e evento disparado</returns>
-        public bool ObterPagina(int index)
+        public void ObterPagina(int index)
         {
-            if (!DocumentoPdfiumCarregado || index < 0 || index >= NumeroPaginas)
-            {
+            if (!DocumentoPdfiumCarregado)
+                throw new FicheiroInvalidoException(caminhoAtual);
+            if (index < 0 || index >= NumeroPaginas)
                 throw new PaginaInvalidaException(index);
-            }
 
             PaginaAlterada?.Invoke(this, index);
-            return true;
         }
 
         /// <summary>
@@ -136,7 +135,6 @@ namespace AsynCollabPDF.Models
 
             // Coloca um novo objeto "PaginaPDF" na variável "pagina" passada por referência
             // Damos o index pretendido e o tipo de documento ao novo objeto (a view vai tratar da renderização)
-            Console.WriteLine($"A enviar página {index} do documento {caminhoAtual}");
             pagina = new PaginaPDF(index, documentoPdfium);
             PaginaEnviada?.Invoke(this, EventArgs.Empty);
         }
