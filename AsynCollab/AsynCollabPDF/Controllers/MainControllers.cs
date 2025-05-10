@@ -10,6 +10,8 @@ namespace AsynCollabPDF.Controllers
     {
         private MainView _view;
         private Document _model;
+        private string _caminhoSegundoFicheiro;
+        private string _caminhoPrimeiroFicheiro;
         ModelLog _modelLog;
 
         public MainController()
@@ -32,6 +34,12 @@ namespace AsynCollabPDF.Controllers
             //ErrorLog
             _view.SolicitarErrorLog += _modelLog.SolicitarLog;
             _modelLog.OnLogAlterado += _view.OnLogAlterado;
+            //Abrir segundo ficheiro
+            _view.OnClickAbrirSegundoFicheiro += UtilizadorClicouEmAbrirSegundoFicheiro;
+            //concatenar PDFs
+            _view.OnClickConcatenarPDFs += UtilizadorClicouEmConcatenarPDFs;
+            //_model.FicheirosConcatenados += _view.OnFicheiroDisponivel; // para mostrar o novo PDF
+
         }
 
         public void IniciarPrograma()
@@ -50,6 +58,8 @@ namespace AsynCollabPDF.Controllers
         // Chamado quando o utilizador seleciona um ficheiro
         public void UtilizadorClicouEmAbrirFicheiro(string localizacaoFicheiro)
         {
+            _caminhoPrimeiroFicheiro = localizacaoFicheiro;
+
             try
             {
                 bool carregado = _model.AbrirFicheiro(localizacaoFicheiro);
@@ -94,6 +104,70 @@ namespace AsynCollabPDF.Controllers
                 );
             }
         }
+        public void UtilizadorClicouEmAbrirSegundoFicheiro(string localizacaoFicheiro)
+        {
+
+            if (!File.Exists(localizacaoFicheiro))
+            {
+                MessageBox.Show("O ficheiro especificado não existe.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            _caminhoSegundoFicheiro = localizacaoFicheiro;
+
+            try
+            {
+                // Aqui você pode armazenar o caminho temporariamente, ou preparar para concatenação
+                // Por exemplo, guardar numa variável ou já pedir concatenação se for o caso.
+                // Para já, apenas tenta abrir o segundo ficheiro para teste:
+
+                bool carregado = _model.AbrirFicheiro(localizacaoFicheiro);
+            }
+            catch (FicheiroInvalidoException ex)
+            {
+                _model.RegistarLog(ex.Message);
+                MessageBox.Show(
+                    "Erro ao carregar o segundo ficheiro. Verifique se o caminho está correto ou se o ficheiro não está corrompido.",
+                    "Erro ao Abrir Segundo Ficheiro",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        public void UtilizadorClicouEmConcatenarPDFs(string _, string __)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(_caminhoSegundoFicheiro))
+                {
+                    MessageBox.Show("O segundo ficheiro não foi selecionado.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                string caminho1 = _caminhoPrimeiroFicheiro; // Você precisará expor isso via uma propriedade pública.
+                string caminho2 = _caminhoSegundoFicheiro;
+
+                string caminhoDestino = Path.Combine(
+                    Path.GetDirectoryName(caminho1),
+                    "Concatenado_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf"
+                );
+
+                bool sucesso = _model.ConcatenarFicheiros(caminho1, caminhoDestino);
+
+                if (sucesso)
+                {
+                    MessageBox.Show("Ficheiros concatenados com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (FicheiroInvalidoException ex)
+            {
+                _model.RegistarLog(ex.Message);
+                MessageBox.Show("Erro ao concatenar ficheiros. Verifique se os ficheiros estão válidos.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
 
     }
 }
