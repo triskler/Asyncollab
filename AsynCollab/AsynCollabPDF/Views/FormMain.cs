@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
-using PdfiumViewer;
+using static AsynCollabPDF.Interfaces;
 
 namespace AsynCollabPDF.Views
 {
     public partial class FormMain : Form
     {
         private MainView view;
-        private PdfiumViewer.PdfDocument pdfDocument; // Documento PDF
-        private PdfiumViewer.PdfDocument segundoPdfDocument; // Segundo documento PDF
+        //private PdfiumViewer.PdfDocument pdfDocument; // Documento PDF
+        //private PdfiumViewer.PdfDocument segundoPdfDocument; // Segundo documento PDF
         private int currentPage = 0; // Página atual
         private string primeiroPdfPath; // Caminho do primeiro PDF
         private string segundoPdfPath; // Caminho do segundo PDF
@@ -200,7 +200,7 @@ namespace AsynCollabPDF.Views
         }*/
 
         // Método que renderiza o arquivo quando o evento EnviarFicheiro é disparado
-        public void RenderizarFicheiro(string ficheiro)
+        /*public void RenderizarFicheiro(string ficheiro)
         {
             // Carrega o documento PDF
             pdfDocument = PdfiumViewer.PdfDocument.Load(ficheiro);
@@ -209,42 +209,37 @@ namespace AsynCollabPDF.Views
 
             // Renderiza a primeira página
             RenderizarPagina(currentPage);
-        }
+        }*/
 
         private void MudarPagina(int direcao)
         {
-            if (pdfDocument == null) return;
+            //if (pdfDocument == null) return;
 
             // Lógica para mudar a página
             currentPage += direcao;
 
             // Limita a página atual
             if (currentPage < 0) currentPage = 0;
-            if (currentPage >= pdfDocument.PageCount) currentPage = pdfDocument.PageCount - 1;
+            //if (currentPage >= pdfDocument.PageCount) currentPage = pdfDocument.PageCount - 1;
 
             lblPaginaAtual.Text = $"Página: {currentPage + 1}";
 
             // Renderiza a nova página no PictureBox
-            RenderizarPagina(currentPage);
-        }
-
-        private void RenderizarPagina(int pagina)
-        {
-            if (pdfDocument == null) return;
-
-            using (var image = pdfDocument.Render(pagina, 300, 300, PdfRenderFlags.Annotations))
-            {
-                pictureBox.Image = image;
-            }
+            view.UtilizadorClicouEmMudarPagina(currentPage);
         }
 
         private void FicheiroInvalidoHandler(string mensagem, string titulo, MessageBoxButtons botoes, MessageBoxIcon icone)
         {
             MessageBox.Show(mensagem, titulo, botoes, icone);
         }
-        public void RenderizarPagina(System.Drawing.Image imagem)
+
+        public void RenderizarPagina(IPagina pagina)
         {
-            // Cria um novo formulário para exibir a imagem recebida (1 página)
+            using var stream = pagina.Ficheiro.ConverterImagemParaStream(pagina.IndexPaginaAtual, pictureBox.Height, pictureBox.Width);
+            pictureBox.Image = Image.FromStream(stream);
+
+            /* Antiga função implementada pelo Rafael (tentei aproveitar a lógica)
+             * // Cria um novo formulário para exibir a imagem recebida (1 página)
             using (var form = new Form())
             {
                 form.Text = "Página PDF";
@@ -259,7 +254,7 @@ namespace AsynCollabPDF.Views
 
                 form.Controls.Add(pictureBox);
                 form.ShowDialog();
-            }
+            }*/
         }
 
         public void EncerrarPrograma()

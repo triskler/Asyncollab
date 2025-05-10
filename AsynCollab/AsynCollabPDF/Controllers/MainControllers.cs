@@ -14,8 +14,8 @@ namespace AsynCollabPDF.Controllers
 
         public MainController()
         {
-            _view = new MainView(_model);
-            _model = new Document(_view);
+            _view = new MainView();
+            _model = new Document();
 
             _modelLog = new ModelLog();
             _model.ModelLog = _modelLog;
@@ -24,13 +24,11 @@ namespace AsynCollabPDF.Controllers
             //Abrir um ficheiro
             _view.OnClickAbrirFicheiro += UtilizadorClicouEmAbrirFicheiro;
             _model.FicheiroDisponivel += _view.OnFicheiroDisponivel;
-            _view.SolicitarFicheiro += _model.EnviarFicheiro;
-            _model.FicheiroEnviado += _view.OnFicheiroEnviado;
+            _view.SolicitarPagina += _model.EnviarPagina;
+            _model.PaginaEnviada += _view.OnPaginaEnviada;
             //Mudar de página
             _view.OnClickMudarPagina += UtilizadorAlterouPagina;
             _model.PaginaAlterada += _view.OnPaginaDisponivel;
-            _view.SolicitarPagina += _model.EnviarPagina;
-            _model.PaginaEnviada += _view.OnPaginaEnviada;
             //ErrorLog
             _view.SolicitarErrorLog += _modelLog.SolicitarLog;
             _modelLog.OnLogAlterado += _view.OnLogAlterado;

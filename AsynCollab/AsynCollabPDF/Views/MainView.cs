@@ -4,8 +4,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using AsynCollabPDF.Models;
+using System.Windows.Forms;
+using static AsynCollabPDF.Interfaces;
 
 /// <summary>
 /// Class View que mantém a comunicação por eventos com o controller e o model. Tive de alterar alguns métodos
@@ -19,23 +19,21 @@ namespace AsynCollabPDF.Views
 {
     public class MainView
     {
-        private Document model;
         private FormMain janela;
         private ViewLog viewLog;
 
         //Variável passada por referência ao model, para renderizar uma página
         //O model abre a página e envia-a para a view, a view só envia o index da página
-        public Image paginaAberta;
+        public IPagina paginaAberta;
 
         public delegate void FicheiroAbertoHandler(string nomeFicheiro);
         public event FicheiroAbertoHandler OnClickAbrirFicheiro;
-        public delegate void SolicitacaoFicheiroHandler(ref Image paginaAberta);
-        public event SolicitacaoFicheiroHandler SolicitarFicheiro;
+
+        public delegate void SolicitacaoPaginaHandler(int indexPagina, ref IPagina paginaAberta);
+        public event SolicitacaoPaginaHandler SolicitarPagina;
 
         public delegate void PaginaAlteradaHandler(int indexPagina);
         public event PaginaAlteradaHandler OnClickMudarPagina;
-        public delegate void SolicitacaoPaginaHandler(int indexPagina, ref Image paginaAberta);
-        public event SolicitacaoPaginaHandler SolicitarPagina;
 
         public delegate string SolicitacaoErrorLogHandler();
         public event SolicitacaoErrorLogHandler SolicitarErrorLog;
@@ -47,9 +45,8 @@ namespace AsynCollabPDF.Views
         public delegate void ConcatenarPDFsHandler(string primeiroPdf, string segundoPdf);
         public event ConcatenarPDFsHandler OnClickConcatenarPDFs;
 
-        public MainView(Document m)
+        public MainView()
         {
-            model = m;
             viewLog = new ViewLog(janela);
             paginaAberta = null;
         }
@@ -83,21 +80,8 @@ namespace AsynCollabPDF.Views
 
         public void OnFicheiroDisponivel(object sender, EventArgs e)
         {
-            SolicitarFicheiro?.Invoke(ref paginaAberta);
-        }
-
-        public void OnFicheiroEnviado(object sender, EventArgs e)
-        {
-            //Devemos chamar sempre o RenderizarPagina e apagamos o RenderizarFicheiro
-            //O model é que tem o trabalho de abrir a página e enviar
-            if (paginaAberta != null)
-            {
-                janela.RenderizarPagina(paginaAberta);
-            }
-            else
-            {
-                MessageBox.Show("A imagem não foi carregada corretamente!");
-            }
+            // Como é a primeira vez que o ficheiro é aberto, abrimos a primeira página (index = 0)
+            SolicitarPagina?.Invoke(0, ref paginaAberta);
         }
 
         public void UtilizadorClicouEmMudarPagina(int indexPagina)
@@ -118,7 +102,7 @@ namespace AsynCollabPDF.Views
             }
             else
             {
-                MessageBox.Show("A imagem não foi carregada corretamente!");
+                MessageBox.Show("A página não foi carregada corretamente!");
             }
         }
 
