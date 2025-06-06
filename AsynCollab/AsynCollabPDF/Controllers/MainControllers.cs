@@ -4,6 +4,13 @@ using System.Linq.Expressions;
 using AsynCollabPDF.Models;
 using AsynCollabPDF.Views;
 
+/// <summary>
+/// Controller 
+/// 
+/// Faz a ligação dos eventos da view com os métodos do model e vice-versa. Também gere as excepções lançadas
+/// pelos outros componentes, com métodos próprios que as recolhem.
+/// </summary>
+
 namespace AsynCollabPDF.Controllers
 {
     public class MainController
@@ -36,12 +43,13 @@ namespace AsynCollabPDF.Controllers
             _modelLog.OnLogAlterado += _view.OnLogAlterado;
             //Abrir segundo ficheiro
             _view.OnClickAbrirSegundoFicheiro += UtilizadorClicouEmAbrirSegundoFicheiro;
-            //concatenar PDFs
+            //Concatenar PDFs
             _view.OnClickConcatenarPDFs += UtilizadorClicouEmConcatenarPDFs;
             //_model.FicheirosConcatenados += _view.OnFicheiroDisponivel; // para mostrar o novo PDF
 
         }
 
+        // Método inicial do programa, chamado pelo método main
         public void IniciarPrograma()
         {
             try
@@ -50,6 +58,17 @@ namespace AsynCollabPDF.Controllers
             } 
             catch (TipoFicheiroInvalidoException ex)
             {
+                _view.AtivarViewLog();
+                _model.RegistarLog(ex.Message);
+            }
+            catch (FicheiroInvalidoException ex)
+            {
+                _view.AtivarViewLog();
+                _model.RegistarLog(ex.Message);
+            }
+            catch (PaginaInvalidaException ex)
+            {
+                _view.AtivarViewLog();
                 _model.RegistarLog(ex.Message);
             }
             
@@ -104,6 +123,8 @@ namespace AsynCollabPDF.Controllers
                 );
             }
         }
+
+        // Chamado quando o utilizador seleciona um segundo ficheiro para concatenar
         public void UtilizadorClicouEmAbrirSegundoFicheiro(string localizacaoFicheiro)
         {
 
@@ -135,8 +156,11 @@ namespace AsynCollabPDF.Controllers
             }
         }
 
+        // Chamado quando o utilizador clica no botão para concatenar. Verifica se os caminhos existem e define o caminho 
+        // do ficheiro de destino, chamando depois o método de concatenação do model
         public void UtilizadorClicouEmConcatenarPDFs(string _, string __)
         {
+            _model.RegistarLog("Este erro é um teste do log de erros.");
             try
             {
                 if (string.IsNullOrEmpty(_caminhoSegundoFicheiro))

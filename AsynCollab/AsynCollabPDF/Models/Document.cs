@@ -8,12 +8,16 @@ using PdfDocumentSharp = PdfSharp.Pdf.PdfDocument;
 using static AsynCollabPDF.Interfaces;
 using System.CodeDom;
 
+/// <summary>
+/// Model 
+/// 
+/// Mantém a comunicação por eventos com o o controller e a view. Utiliza PdfSharp para leitura 
+/// de ficheiros PDF e PdfiumViewer para renderização de páginas. Aplica a classe FicheiroPdfium 
+/// para implementar as interfaces IFicheiroPDF e IPagina, permitindo que a view interaja com as páginas PDF.
+/// </summary>
+
 namespace AsynCollabPDF.Models
 {
-    /// <summary>
-    /// Classe que representa um documento PDF.
-    /// Usa PdfSharp para leitura e PdfiumViewer para renderização.
-    /// </summary>
     public class Document : IDisposable
     {
         ModelLog modelLog;
@@ -21,13 +25,16 @@ namespace AsynCollabPDF.Models
         private FicheiroPdfium documentoPdfium;
         private string caminhoAtual;
 
-        // Evento que notifica quando um ficheiro é carregado com sucesso e quando é enviado por referência
-        public event EventHandler FicheiroDisponivel;
-        public event EventHandler FicheiroEnviado;
+        // Eventos que notificam quando um ficheiro é carregado com sucesso e quando é enviado por referência
+        public delegate void FicheiroDisponivelHandler();
+        public event FicheiroDisponivelHandler FicheiroDisponivel;
 
-        // Evento que notifica quando uma nova página é solicitada
-        public event EventHandler<int> PaginaAlterada;
-        public event EventHandler PaginaEnviada;
+        // Eventos que notificam quando uma nova página é solicitada
+        public delegate void PaginaAlteradaHandler(int indexPagina);
+        public event PaginaAlteradaHandler PaginaAlterada;
+
+        public delegate void PaginaEnviadaHandler();
+        public event PaginaEnviadaHandler PaginaEnviada;
 
         public delegate void FicheirosConcatenadosHandler(string caminhoFicheiro);
         public event FicheirosConcatenadosHandler FicheirosConcatenados;
@@ -70,7 +77,7 @@ namespace AsynCollabPDF.Models
                 documentoPdfium = new FicheiroPdfium(localizacaoFicheiro);
                 caminhoAtual = localizacaoFicheiro;
 
-                FicheiroDisponivel?.Invoke(this, EventArgs.Empty);
+                FicheiroDisponivel?.Invoke();
                 return true;
             }
             
@@ -93,19 +100,6 @@ namespace AsynCollabPDF.Models
         }
 
         /// <summary>
-        /// Renderiza a primeira página do documento.
-        /// </summary>
-        /// <param name="pagina">Imagem onde o conteúdo será colocado</param>
-        /// <returns>True se renderizado com sucesso</returns>
-        /*public void EnviarFicheiro(ref Image pagina)
-        {
-            //Em vez de bool, deve lançar excepções
-            //EnviarPagina(0, ref pagina);
-            pagina = documentoPdfium.Render(0, 800, 1000, true);
-            FicheiroEnviado?.Invoke(this, EventArgs.Empty);
-        }*/
-
-        /// <summary>
         /// Dispara evento para notificar que uma página foi pedida.
         /// </summary>
         /// <param name="index">Índice da página</param>
@@ -117,7 +111,7 @@ namespace AsynCollabPDF.Models
             if (index < 0 || index >= NumeroPaginas)
                 throw new PaginaInvalidaException(index);
 
-            PaginaAlterada?.Invoke(this, index);
+            PaginaAlterada?.Invoke(index);
         }
 
         /// <summary>
@@ -136,7 +130,7 @@ namespace AsynCollabPDF.Models
             // Coloca um novo objeto "PaginaPDF" na variável "pagina" passada por referência
             // Damos o index pretendido e o tipo de documento ao novo objeto (a view vai tratar da renderização)
             pagina = new PaginaPDF(index, documentoPdfium);
-            PaginaEnviada?.Invoke(this, EventArgs.Empty);
+            PaginaEnviada?.Invoke();
         }
 
         /// <summary>

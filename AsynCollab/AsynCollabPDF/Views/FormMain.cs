@@ -3,6 +3,13 @@ using System.IO;
 using System.Windows.Forms;
 using static AsynCollabPDF.Interfaces;
 
+/// <summary>
+/// View (UI)
+/// 
+/// Contém a lógica de apresentação e interação com o utilizador. Todos os métodos funcionais do componente view estão nesta classe.
+/// Utilizamos a framework WinForms para criar a interface do utilizador.
+/// </summary>
+
 namespace AsynCollabPDF.Views
 {
     public partial class FormMain : Form
@@ -14,6 +21,8 @@ namespace AsynCollabPDF.Views
         private PictureBox pictureBox; // PictureBox para visualização do PDF
         private Label lblPaginaAtual; // Label para mostrar a página atual
 
+
+        // Construtor
         public FormMain()
         {
             InitializeComponent();
@@ -162,6 +171,7 @@ namespace AsynCollabPDF.Views
 
         public MainView View { get => view; set => view = value; }
 
+        // Os eventos internos da view são tratados aqui
         public void btnCarregarPDF_Click(object sender, EventArgs e)
         {
             // A view trata de abrir o file browser e obter o nome / caminho do ficheiro
@@ -189,6 +199,7 @@ namespace AsynCollabPDF.Views
             }
         }
 
+        // Método que muda a página e lança o evento para o model
         private void MudarPagina(int direcao)
         {
             if (view.paginaAberta.Ficheiro == null) return;
@@ -202,15 +213,15 @@ namespace AsynCollabPDF.Views
             if (currentPage >= view.paginaAberta.Ficheiro.NumeroPaginas)
             {
                 currentPage = view.paginaAberta.Ficheiro.NumeroPaginas - 1;
-                MessageBox.Show(
+                /*MessageBox.Show(
                     "Atingiu o final do ficheiro. Nothing to see beyond this point.",
                     "Página Inválida",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
-                );
+                );*/
             }
 
-            // Renderiza a nova página no PictureBox
+            // Chama o método da View que lança o evento para pedir a nova página ao model
             view.UtilizadorClicouEmMudarPagina(currentPage);
         }
 
@@ -219,13 +230,14 @@ namespace AsynCollabPDF.Views
             MessageBox.Show(mensagem, titulo, botoes, icone);
         }
 
+        // Método que renderiza a página atual na PictureBox
         public void RenderizarPagina(IPagina pagina)
         {
-            /* A interface permite à View receber um stream da página, para poder decidir como fazer a renderização
-             * 
-             * A view não sabe nem precisa de saber qual a API que o model utilizou para abrir / converter a página,
-             * apenas que o model devolve um stream com a imagem da página.
-            **/
+            // A interface permite à View receber um stream da página, para poder decidir como fazer a renderização
+
+            //A view não sabe nem precisa de saber qual a API que o model utilizou para abrir / converter a página,
+            //apenas que o model devolve um stream com a imagem da página.
+
             using var stream = pagina.Ficheiro.ConverterPaginaParaStream(pagina.IndexPaginaAtual, pictureBox.Height, pictureBox.Width);
             lblPaginaAtual.Text = $"Página: {pagina.IndexPaginaAtual + 1}";
             pictureBox.Image = Image.FromStream(stream);

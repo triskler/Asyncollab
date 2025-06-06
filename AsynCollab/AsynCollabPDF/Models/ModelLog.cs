@@ -1,4 +1,5 @@
 using System;
+using static AsynCollabPDF.Interfaces;
 
 namespace AsynCollabPDF.Models
 {
@@ -12,23 +13,25 @@ namespace AsynCollabPDF.Models
 		public delegate void LogAlteradoHandler();
 		public event LogAlteradoHandler OnLogAlterado;
 
+		private List<ILogItem> errorLog;
 		private int errorCount;
-		private string errorLog;
-		
-		public ModelLog()
+
+        public ModelLog()
 		{
 			errorCount = 0;
-			errorLog = "";
-		}
+            errorLog = new List<ILogItem>();
+        }
 
 		public void LogErro(string msg)
 		{
-			errorCount++;
-			errorLog += DateTime.Now + "Erro nº " + errorCount + ": " + msg + System.Environment.NewLine;
+            LogItem item = new LogItem();
+			item.ID = errorCount++;
+			item.TimeStamp = DateTime.Now;
+            item.Message = msg;
 			OnLogAlterado?.Invoke();
 		}
 
-		public string SolicitarLog()
+		public List<ILogItem> SolicitarLog()
 		{
 			return errorLog;
 		}

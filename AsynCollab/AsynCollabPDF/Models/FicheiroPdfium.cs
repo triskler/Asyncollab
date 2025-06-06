@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using PdfiumViewer;
 using static AsynCollabPDF.Interfaces;
 
+/// <summary>
+/// Representa um ficheiro PDF utilizando a biblioteca PdfiumViewer. Tem como base a interface IFicheiroPDF, que define os métodos 
+/// necessários para converter uma página PDF num stream de imagem.
+/// </summary>
+
 namespace AsynCollabPDF.Models
 {
     class FicheiroPdfium: IFicheiroPDF
